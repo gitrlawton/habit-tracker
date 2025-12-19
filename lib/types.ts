@@ -8,6 +8,7 @@ export interface Habit {
   targetDays?: number[];
   createdAt: string;
   completions: Record<string, boolean>;
+  active: boolean;
 }
 
 export interface HabitStats {

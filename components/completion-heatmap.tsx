@@ -123,7 +123,7 @@ export function CompletionHeatmap({ habits }: CompletionHeatmapProps) {
         </div>
       </div>
 
-      <div ref={scrollRef} className="overflow-x-auto">
+      <div ref={scrollRef} className="overflow-x-auto pb-1">
         <div className="mx-auto" style={{ width: `${gridWidth}px` }}>
           <div className="flex mb-1 relative" style={{ height: '16px' }}>
             {monthLabels.map((label, i) => (

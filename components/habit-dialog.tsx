@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface HabitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (habit: Omit<Habit, 'id' | 'createdAt' | 'completions'>) => void;
+  onSave: (habit: Omit<Habit, 'id' | 'createdAt' | 'completions' | 'active'>) => void;
   habit?: Habit | null;
 }
 

@@ -6,8 +6,9 @@ import { Habit } from '@/lib/types';
 import { HabitCard } from '@/components/habit-card';
 import { HabitDialog } from '@/components/habit-dialog';
 import { StatsOverview } from '@/components/stats-overview';
+import { ManageHabitsDialog } from '@/components/manage-habits-dialog';
 import { Button } from '@/components/ui/button';
-import { Plus, Target, Sparkles } from 'lucide-react';
+import { Plus, Target, Sparkles, Settings2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,12 +22,13 @@ import {
 import { format } from 'date-fns';
 
 export default function Home() {
-  const { habits, isLoaded, addHabit, updateHabit, deleteHabit, toggleCompletion } = useHabits();
+  const { habits, activeHabits, isLoaded, addHabit, updateHabit, deleteHabit, toggleCompletion } = useHabits();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [deletingHabitId, setDeletingHabitId] = useState<string | null>(null);
 
-  const handleSaveHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'completions'>) => {
+  const handleSaveHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'completions' | 'active'>) => {
     if (editingHabit) {
       updateHabit(editingHabit.id, habitData);
       setEditingHabit(null);
@@ -58,6 +60,10 @@ export default function Home() {
     }
   };
 
+  const handleToggleActive = (id: string, active: boolean) => {
+    updateHabit(id, { active });
+  };
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -84,20 +90,31 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <Button
-              onClick={() => setDialogOpen(true)}
-              size="lg"
-              className="shadow-lg"
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              New Habit
-            </Button>
+            <div className="flex items-center gap-2">
+              {habits.length > 0 && (
+                <Button
+                  onClick={() => setManageDialogOpen(true)}
+                  variant="outline"
+                  className="h-9 px-3 text-sm sm:h-10 sm:px-4 sm:text-base lg:h-11 lg:px-6"
+                >
+                  <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Manage</span>
+                </Button>
+              )}
+              <Button
+                onClick={() => setDialogOpen(true)}
+                className="h-9 px-3 text-sm sm:h-10 sm:px-4 sm:text-base lg:h-11 lg:px-6 shadow-lg"
+              >
+                <Plus className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                <span className="hidden sm:inline">New Habit</span>
+              </Button>
+            </div>
           </div>
         </div>
 
-        {habits.length > 0 ? (
+        {activeHabits.length > 0 ? (
           <div className="space-y-6 sm:space-y-8">
-            <StatsOverview habits={habits} />
+            <StatsOverview habits={activeHabits} />
 
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -105,7 +122,7 @@ export default function Home() {
                 <h2 className="text-xl sm:text-2xl font-semibold">Your Habits</h2>
               </div>
               <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {habits.map((habit) => (
+                {activeHabits.map((habit) => (
                   <HabitCard
                     key={habit.id}
                     habit={habit}
@@ -129,8 +146,11 @@ export default function Home() {
               Create your first habit and start tracking your progress. Build consistency
               one day at a time.
             </p>
-            <Button onClick={() => setDialogOpen(true)} size="lg" className="shadow-lg">
-              <Plus className="mr-2 h-5 w-5" />
+            <Button
+              onClick={() => setDialogOpen(true)}
+              className="h-10 px-4 text-sm sm:h-11 sm:px-6 sm:text-base shadow-lg"
+            >
+              <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Create Your First Habit
             </Button>
           </div>
@@ -142,6 +162,13 @@ export default function Home() {
         onOpenChange={handleDialogClose}
         onSave={handleSaveHabit}
         habit={editingHabit}
+      />
+
+      <ManageHabitsDialog
+        open={manageDialogOpen}
+        onOpenChange={setManageDialogOpen}
+        habits={habits}
+        onToggleActive={handleToggleActive}
       />
 
       <AlertDialog open={!!deletingHabitId} onOpenChange={(open) => !open && setDeletingHabitId(null)}>

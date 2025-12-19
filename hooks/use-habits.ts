@@ -14,7 +14,12 @@ export function useHabits() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setHabits(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        const migrated = parsed.map((habit: Habit) => ({
+          ...habit,
+          active: habit.active ?? true
+        }));
+        setHabits(migrated);
       } catch (error) {
         console.error('Failed to parse habits:', error);
       }
@@ -28,12 +33,13 @@ export function useHabits() {
     }
   }, [habits, isLoaded]);
 
-  const addHabit = (habit: Omit<Habit, 'id' | 'createdAt' | 'completions'>) => {
+  const addHabit = (habit: Omit<Habit, 'id' | 'createdAt' | 'completions' | 'active'>) => {
     const newHabit: Habit = {
       ...habit,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
-      completions: {}
+      completions: {},
+      active: true
     };
     setHabits(prev => [...prev, newHabit]);
   };
@@ -62,8 +68,11 @@ export function useHabits() {
     );
   };
 
+  const activeHabits = habits.filter(h => h.active);
+
   return {
     habits,
+    activeHabits,
     isLoaded,
     addHabit,
     updateHabit,
