@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useHabits } from '@/hooks/use-habits';
 import { Habit } from '@/lib/types';
 import { HabitCard } from '@/components/habit-card';
@@ -21,12 +21,26 @@ import {
 } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 
+export interface ActiveTimerState {
+  habitId: string;
+  isRunning: boolean;
+  elapsedSeconds: number;
+}
+
 export default function Home() {
-  const { habits, activeHabits, isLoaded, addHabit, updateHabit, deleteHabit, toggleCompletion } = useHabits();
+  const { habits, activeHabits, isLoaded, addHabit, updateHabit, deleteHabit, toggleCompletion, updateTimedProgress } = useHabits();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [deletingHabitId, setDeletingHabitId] = useState<string | null>(null);
+  const [activeTimers, setActiveTimers] = useState<Record<string, ActiveTimerState>>({});
+
+  const handleTimerStateChange = useCallback((habitId: string, isRunning: boolean, elapsedSeconds: number) => {
+    setActiveTimers(prev => ({
+      ...prev,
+      [habitId]: { habitId, isRunning, elapsedSeconds }
+    }));
+  }, []);
 
   const handleSaveHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'completions' | 'active'>) => {
     if (editingHabit) {
@@ -114,7 +128,7 @@ export default function Home() {
 
         {activeHabits.length > 0 ? (
           <div className="space-y-6 sm:space-y-8">
-            <StatsOverview habits={activeHabits} />
+            <StatsOverview habits={activeHabits} activeTimers={activeTimers} />
 
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -129,6 +143,8 @@ export default function Home() {
                     onToggle={() => toggleCompletion(habit.id)}
                     onEdit={() => handleEditClick(habit)}
                     onDelete={() => handleDeleteClick(habit.id)}
+                    onUpdateTimedProgress={updateTimedProgress}
+                    onTimerStateChange={handleTimerStateChange}
                   />
                 ))}
               </div>

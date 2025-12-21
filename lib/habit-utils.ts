@@ -10,12 +10,29 @@ export const getDateKey = (date: Date): string => {
 };
 
 export const isHabitCompletedToday = (habit: Habit): boolean => {
-  return habit.completions[getTodayKey()] === true;
+  const todayKey = getTodayKey();
+  if (!habit.completions[todayKey]) return false;
+  if (habit.isTimed) {
+    const minutes = habit.timedCompletions?.[todayKey] || 0;
+    return minutes >= (habit.targetMinutes || 30);
+  }
+  return true;
 };
 
+const MIN_TIMED_MINUTES_FOR_STREAK = 15;
+
 export const calculateStats = (habit: Habit): HabitStats => {
+  const isValidCompletion = (dateKey: string): boolean => {
+    if (!habit.completions[dateKey]) return false;
+    if (habit.isTimed) {
+      const minutes = habit.timedCompletions?.[dateKey] || 0;
+      return minutes >= MIN_TIMED_MINUTES_FOR_STREAK;
+    }
+    return true;
+  };
+
   const sortedDates = Object.entries(habit.completions)
-    .filter(([_, completed]) => completed)
+    .filter(([date, completed]) => completed && isValidCompletion(date))
     .map(([date]) => date)
     .sort((a, b) => b.localeCompare(a));
 

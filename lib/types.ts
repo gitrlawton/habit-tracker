@@ -9,6 +9,9 @@ export interface Habit {
   createdAt: string;
   completions: Record<string, boolean>;
   active: boolean;
+  isTimed?: boolean;
+  targetMinutes?: number;
+  timedCompletions?: Record<string, number>;
 }
 
 export interface HabitStats {

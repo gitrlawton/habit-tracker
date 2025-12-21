@@ -13,6 +13,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Clock } from 'lucide-react';
 
 interface HabitDialogProps {
   open: boolean;
@@ -34,20 +43,40 @@ const COLORS = [
   '#f43f5e'
 ];
 
+const TIME_OPTIONS = [
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 45, label: '45 min' },
+  { value: 60, label: '1 hr' },
+  { value: 75, label: '1 hr 15 min' },
+  { value: 90, label: '1 hr 30 min' },
+  { value: 105, label: '1 hr 45 min' },
+  { value: 120, label: '2 hr' },
+  { value: 150, label: '2 hr 30 min' },
+  { value: 180, label: '3 hr' },
+  { value: 240, label: '4 hr' },
+];
+
 export function HabitDialog({ open, onOpenChange, onSave, habit }: HabitDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(COLORS[0]);
+  const [isTimed, setIsTimed] = useState(false);
+  const [targetMinutes, setTargetMinutes] = useState(30);
 
   useEffect(() => {
     if (habit) {
       setName(habit.name);
       setDescription(habit.description || '');
       setColor(habit.color);
+      setIsTimed(habit.isTimed || false);
+      setTargetMinutes(habit.targetMinutes || 30);
     } else {
       setName('');
       setDescription('');
       setColor(COLORS[0]);
+      setIsTimed(false);
+      setTargetMinutes(30);
     }
   }, [habit, open]);
 
@@ -60,7 +89,9 @@ export function HabitDialog({ open, onOpenChange, onSave, habit }: HabitDialogPr
       description: description.trim(),
       color,
       icon: 'circle',
-      frequency: 'daily'
+      frequency: 'daily',
+      isTimed,
+      targetMinutes: isTimed ? targetMinutes : undefined,
     });
 
     onOpenChange(false);
@@ -119,6 +150,44 @@ export function HabitDialog({ open, onOpenChange, onSave, habit }: HabitDialogPr
                 />
               ))}
             </div>
+          </div>
+
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="timed" className="font-medium cursor-pointer">Timed Habit</Label>
+              </div>
+              <Switch
+                id="timed"
+                checked={isTimed}
+                onCheckedChange={setIsTimed}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Track time spent instead of simple completion
+            </p>
+
+            {isTimed && (
+              <div className="space-y-2 pt-2">
+                <Label htmlFor="targetTime">Daily Target Time</Label>
+                <Select
+                  value={targetMinutes.toString()}
+                  onValueChange={(v) => setTargetMinutes(parseInt(v))}
+                >
+                  <SelectTrigger id="targetTime">
+                    <SelectValue placeholder="Select time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIME_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value.toString()}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">

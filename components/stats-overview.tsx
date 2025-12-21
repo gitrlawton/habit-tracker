@@ -5,12 +5,14 @@ import { isHabitCompletedToday } from '@/lib/habit-utils';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2 } from 'lucide-react';
 import { CompletionHeatmap } from '@/components/completion-heatmap';
+import { ActiveTimerState } from '@/app/page';
 
 interface StatsOverviewProps {
   habits: Habit[];
+  activeTimers?: Record<string, ActiveTimerState>;
 }
 
-export function StatsOverview({ habits }: StatsOverviewProps) {
+export function StatsOverview({ habits, activeTimers }: StatsOverviewProps) {
   const totalHabits = habits.length;
   const completedToday = habits.filter(isHabitCompletedToday).length;
 
@@ -34,7 +36,7 @@ export function StatsOverview({ habits }: StatsOverviewProps) {
 
       <div className="lg:col-span-3 min-w-0">
         <Card className="p-3 sm:p-4 h-full overflow-hidden">
-          <CompletionHeatmap habits={habits} />
+          <CompletionHeatmap habits={habits} activeTimers={activeTimers} />
         </Card>
       </div>
     </div>

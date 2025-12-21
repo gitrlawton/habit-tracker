@@ -10,19 +10,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ActiveTimerState } from '@/app/page';
 
 interface CompletionHeatmapProps {
   habits: Habit[];
+  activeTimers?: Record<string, ActiveTimerState>;
 }
 
 const CELL_SIZE = 12;
 const GAP = 3;
 const WEEKS = 53;
 
-export function CompletionHeatmap({ habits }: CompletionHeatmapProps) {
+export function CompletionHeatmap({ habits, activeTimers }: CompletionHeatmapProps) {
   const [selectedHabitId, setSelectedHabitId] = useState<string>('all');
   const scrollRef = useRef<HTMLDivElement>(null);
   const today = new Date();
+  const todayKey = today.toISOString().split('T')[0];
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -45,6 +48,31 @@ export function CompletionHeatmap({ habits }: CompletionHeatmapProps) {
       return !!selectedHabit.completions[dateKey];
     }
     return false;
+  };
+
+  const getTimedCompletionRatio = (date: Date): number => {
+    const dateKey = date.toISOString().split('T')[0];
+    if (selectedHabit && selectedHabit.isTimed) {
+      const target = selectedHabit.targetMinutes || 30;
+      if (dateKey === todayKey && activeTimers?.[selectedHabit.id]) {
+        const liveMinutes = activeTimers[selectedHabit.id].elapsedSeconds / 60;
+        return Math.min(liveMinutes / target, 1);
+      }
+      const minutes = selectedHabit.timedCompletions?.[dateKey] || 0;
+      return Math.min(minutes / target, 1);
+    }
+    return 0;
+  };
+
+  const getLiveTimedMinutes = (date: Date): number => {
+    const dateKey = date.toISOString().split('T')[0];
+    if (selectedHabit && selectedHabit.isTimed) {
+      if (dateKey === todayKey && activeTimers?.[selectedHabit.id]) {
+        return activeTimers[selectedHabit.id].elapsedSeconds / 60;
+      }
+      return selectedHabit.timedCompletions?.[dateKey] || 0;
+    }
+    return 0;
   };
 
   const getCompletionsForDate = (date: Date): number => {
@@ -162,21 +190,32 @@ export function CompletionHeatmap({ habits }: CompletionHeatmapProps) {
 
                     if (selectedHabit) {
                       const completed = isCompletedForDate(date);
+                      const timedRatio = getTimedCompletionRatio(date);
+                      const isTimed = selectedHabit.isTimed;
+                      const hasProgress = isTimed && timedRatio > 0;
+                      const dateKey = date.toISOString().split('T')[0];
+                      const liveMinutes = getLiveTimedMinutes(date);
+
                       return (
                         <Tooltip key={dayIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`rounded-[2px] transition-colors hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 cursor-pointer ${!completed ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
+                              className={`rounded-[2px] transition-colors hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 cursor-pointer ${!completed && !hasProgress ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
                               style={{
                                 width: `${CELL_SIZE}px`,
                                 height: `${CELL_SIZE}px`,
-                                backgroundColor: completed ? selectedHabit.color : undefined
+                                backgroundColor: (completed || hasProgress) ? selectedHabit.color : undefined,
+                                opacity: isTimed ? (hasProgress ? Math.max(timedRatio, 0.2) : undefined) : (completed ? 1 : undefined)
                               }}
                             />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-xs">
-                              {completed ? 'Completed' : 'Not completed'}
+                              {isTimed
+                                ? (liveMinutes > 0
+                                    ? `${Math.round(liveMinutes)} min (${Math.round(timedRatio * 100)}%)`
+                                    : 'No time tracked')
+                                : (completed ? 'Completed' : 'Not completed')}
                             </p>
                             <p className="text-xs text-muted-foreground">{formatDate(date)}</p>
                           </TooltipContent>

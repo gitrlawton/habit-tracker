@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Habit } from '@/lib/types';
 import { getTodayKey } from '@/lib/habit-utils';
 
@@ -17,7 +17,8 @@ export function useHabits() {
         const parsed = JSON.parse(stored);
         const migrated = parsed.map((habit: Habit) => ({
           ...habit,
-          active: habit.active ?? true
+          active: habit.active ?? true,
+          timedCompletions: habit.timedCompletions ?? {}
         }));
         setHabits(migrated);
       } catch (error) {
@@ -33,28 +34,29 @@ export function useHabits() {
     }
   }, [habits, isLoaded]);
 
-  const addHabit = (habit: Omit<Habit, 'id' | 'createdAt' | 'completions' | 'active'>) => {
+  const addHabit = useCallback((habit: Omit<Habit, 'id' | 'createdAt' | 'completions' | 'active'>) => {
     const newHabit: Habit = {
       ...habit,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       completions: {},
-      active: true
+      active: true,
+      timedCompletions: habit.isTimed ? {} : undefined
     };
     setHabits(prev => [...prev, newHabit]);
-  };
+  }, []);
 
-  const updateHabit = (id: string, updates: Partial<Habit>) => {
+  const updateHabit = useCallback((id: string, updates: Partial<Habit>) => {
     setHabits(prev =>
       prev.map(habit => (habit.id === id ? { ...habit, ...updates } : habit))
     );
-  };
+  }, []);
 
-  const deleteHabit = (id: string) => {
+  const deleteHabit = useCallback((id: string) => {
     setHabits(prev => prev.filter(habit => habit.id !== id));
-  };
+  }, []);
 
-  const toggleCompletion = (id: string, date?: string) => {
+  const toggleCompletion = useCallback((id: string, date?: string) => {
     const dateKey = date || getTodayKey();
     setHabits(prev =>
       prev.map(habit => {
@@ -66,7 +68,34 @@ export function useHabits() {
         return habit;
       })
     );
-  };
+  }, []);
+
+  const updateTimedProgress = useCallback((id: string, minutes: number) => {
+    const dateKey = getTodayKey();
+    setHabits(prev =>
+      prev.map(habit => {
+        if (habit.id === id && habit.isTimed) {
+          const targetMinutes = habit.targetMinutes || 30;
+          const newTimedCompletions = { ...habit.timedCompletions };
+          newTimedCompletions[dateKey] = minutes;
+
+          const newCompletions = { ...habit.completions };
+          if (minutes >= targetMinutes) {
+            newCompletions[dateKey] = true;
+          } else if (minutes >= 15) {
+            newCompletions[dateKey] = true;
+          }
+
+          return {
+            ...habit,
+            timedCompletions: newTimedCompletions,
+            completions: newCompletions
+          };
+        }
+        return habit;
+      })
+    );
+  }, []);
 
   const activeHabits = habits.filter(h => h.active);
 
@@ -77,6 +106,7 @@ export function useHabits() {
     addHabit,
     updateHabit,
     deleteHabit,
-    toggleCompletion
+    toggleCompletion,
+    updateTimedProgress
   };
 }
