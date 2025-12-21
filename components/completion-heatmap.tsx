@@ -200,7 +200,7 @@ export function CompletionHeatmap({ habits, activeTimers }: CompletionHeatmapPro
                         <Tooltip key={dayIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`rounded-[2px] transition-colors hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 cursor-pointer ${!completed && !hasProgress ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
+                              className={`rounded-[2px] hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 cursor-pointer ${!completed && !hasProgress ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
                               style={{
                                 width: `${CELL_SIZE}px`,
                                 height: `${CELL_SIZE}px`,
@@ -230,7 +230,7 @@ export function CompletionHeatmap({ habits, activeTimers }: CompletionHeatmapPro
                       <Tooltip key={dayIndex}>
                         <TooltipTrigger asChild>
                           <div
-                            className={`rounded-[2px] ${colorClass} transition-colors hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 cursor-pointer`}
+                            className={`rounded-[2px] ${colorClass} hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 cursor-pointer`}
                             style={{
                               width: `${CELL_SIZE}px`,
                               height: `${CELL_SIZE}px`
