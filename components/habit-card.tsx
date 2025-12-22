@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle2, Circle, Flame, MoreVertical, Clock, Play, Pause } from 'lucide-react';
+import { CheckCircle2, Circle, Flame, MoreVertical, Clock, Play, Pause, Trophy } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -157,10 +157,14 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onUpdateTimedProg
           </DropdownMenu>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
           <Badge variant="secondary" className="flex items-center gap-1 w-fit">
             <Flame className="h-3 w-3 text-orange-500" />
             <span className="text-xs">{stats.currentStreak} day streak</span>
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1 w-fit">
+            <Trophy className="h-3 w-3 text-amber-500" />
+            <span className="text-xs">Best: {stats.longestStreak}</span>
           </Badge>
         </div>
 
