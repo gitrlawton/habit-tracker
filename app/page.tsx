@@ -9,6 +9,7 @@ import { StatsOverview } from '@/components/stats-overview';
 import { ManageHabitsDialog } from '@/components/manage-habits-dialog';
 import { Button } from '@/components/ui/button';
 import { Plus, Target, Sparkles, Settings2 } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -105,6 +106,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               {habits.length > 0 && (
                 <Button
                   onClick={() => setManageDialogOpen(true)}
