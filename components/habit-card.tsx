@@ -7,13 +7,15 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle2, Circle, Flame, MoreVertical, Clock, Play, Pause, Trophy } from 'lucide-react';
+import { CheckCircle2, Circle, Flame, MoreVertical, Clock, Play, Pause, Trophy, Share2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ShareAchievementDialog } from './share-achievement-dialog';
 import { format } from 'date-fns';
 
 interface HabitCardProps {
@@ -56,6 +58,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onUpdateTimedProg
 
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(todayMinutes * 60);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const elapsedSecondsRef = useRef(elapsedSeconds);
 
   useEffect(() => {
@@ -149,6 +152,11 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onUpdateTimedProg
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
               <DropdownMenuItem onClick={onDelete} className="text-red-600">
                 Delete
@@ -284,6 +292,12 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onUpdateTimedProg
           </Button>
         )}
       </div>
+
+      <ShareAchievementDialog
+        habit={habit}
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+      />
     </Card>
   );
 }
