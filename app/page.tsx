@@ -7,8 +7,9 @@ import { HabitCard } from '@/components/habit-card';
 import { HabitDialog } from '@/components/habit-dialog';
 import { StatsOverview } from '@/components/stats-overview';
 import { ManageHabitsDialog } from '@/components/manage-habits-dialog';
+import { AnalyticsModal } from '@/components/analytics-modal';
 import { Button } from '@/components/ui/button';
-import { Plus, Target, Sparkles, Settings2 } from 'lucide-react';
+import { Plus, Target, Sparkles, Settings2, BarChart3 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
   AlertDialog,
@@ -32,6 +33,7 @@ export default function Home() {
   const { habits, activeHabits, isLoaded, addHabit, updateHabit, deleteHabit, toggleCompletion, updateTimedProgress } = useHabits();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
+  const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [deletingHabitId, setDeletingHabitId] = useState<string | null>(null);
   const [activeTimers, setActiveTimers] = useState<Record<string, ActiveTimerState>>({});
@@ -108,14 +110,24 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <ThemeToggle />
               {habits.length > 0 && (
-                <Button
-                  onClick={() => setManageDialogOpen(true)}
-                  variant="outline"
-                  className="h-9 px-3 text-sm sm:h-10 sm:px-4 sm:text-base lg:h-11 lg:px-6"
-                >
-                  <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
-                  <span className="hidden sm:inline">Manage</span>
-                </Button>
+                <>
+                  <Button
+                    onClick={() => setAnalyticsDialogOpen(true)}
+                    variant="outline"
+                    className="h-9 px-3 text-sm sm:h-10 sm:px-4 sm:text-base lg:h-11 lg:px-6"
+                  >
+                    <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                    <span className="hidden sm:inline">Analytics</span>
+                  </Button>
+                  <Button
+                    onClick={() => setManageDialogOpen(true)}
+                    variant="outline"
+                    className="h-9 px-3 text-sm sm:h-10 sm:px-4 sm:text-base lg:h-11 lg:px-6"
+                  >
+                    <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                    <span className="hidden sm:inline">Manage</span>
+                  </Button>
+                </>
               )}
               <Button
                 onClick={() => setDialogOpen(true)}
@@ -187,6 +199,12 @@ export default function Home() {
         onOpenChange={setManageDialogOpen}
         habits={habits}
         onToggleActive={handleToggleActive}
+      />
+
+      <AnalyticsModal
+        open={analyticsDialogOpen}
+        onOpenChange={setAnalyticsDialogOpen}
+        habits={activeHabits}
       />
 
       <AlertDialog open={!!deletingHabitId} onOpenChange={(open) => !open && setDeletingHabitId(null)}>
